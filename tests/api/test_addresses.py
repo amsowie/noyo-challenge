@@ -147,6 +147,32 @@ def test_implementation_create_and_update_address(
             "end_date": None,
         }
 
+def test_most_recent_address_return(
+    test_context, client, seed_address_segment
+):
+   with test_context:
+        put_response = client.put(
+            f"/api/persons/{seed_address_segment.person_id}/address",
+            json={
+                "street_one": "1 California Street",
+                "city": "San Francisco",
+                "state": "CA",
+                "zip_code": "94111",
+                "start_date": "2021-06-15",
+            },
+        )
+
+        response = client.get(f"/api/persons/{seed_address_segment.person_id}/address")
+        assert response.status_code == 200
+        assert response.json == {
+             "street_one": "1 California Street",
+            "street_two": None,
+            "city": "San Francisco",
+            "state": "CA",
+            "zip_code": "94111",
+            "start_date": "2021-06-15",
+            "end_date": None,
+        }
 
 # TODO: Extension One
 # def test_extension_one_validation_of_same_start_date(test_context, client, seed_address_segment):

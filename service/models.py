@@ -9,7 +9,7 @@ class Person(db.Model):
     __tablename__ = "persons"
 
     address_segments = db.relationship(
-        "AddressSegment", order_by="desc(AddressSegment.start_date)"
+        "AddressSegment", order_by="asc(AddressSegment.start_date)"
     )
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=lambda: uuid.uuid4())

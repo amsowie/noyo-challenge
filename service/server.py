@@ -15,10 +15,20 @@ def initialize_routes(app: Flask) -> None:
     import service.api.persons  # noqa 401
     import service.api.addresses  # noqa 401
 
+class InvalidStartDate(ValueError):
+    def __init__(self, *args):
+        code = 422
+        data = {}
+        if args:
+            data = {"messages": args}
+        else:
+            data = {"messages": "Invalid data"}
+
 
 def initialize_error_handlers(app: Flask) -> None:
 
     # Return validation errors as JSON
+    @app.errorhandler(InvalidStartDate)
     @app.errorhandler(422)
     @app.errorhandler(400)
     def handle_422_error(err):
@@ -30,7 +40,7 @@ def initialize_error_handlers(app: Flask) -> None:
     def handle_404_error(err):
         return (
             jsonify(
-                {"error": getattr(err, "description", "resource does not exit")}
+                {"error": getattr(err, "description", "resource does not exist")}
             ),  # noqa 501
             404,
         )

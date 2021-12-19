@@ -27,7 +27,8 @@ services:
       - db
     links:
       - db
-
+    stdin_open: true
+    tty: true
   db:
     image: postgres:9.6-alpine
     ports:
