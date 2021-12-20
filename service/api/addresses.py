@@ -5,9 +5,10 @@ from datetime import datetime, timedelta
 from flask import abort, jsonify
 from webargs.flaskparser import use_args
 
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, ValidationError, validates_schema
 
-from service.server import app, db, InvalidStartDate
+from service.api.persons import PersonResultSchema
+from service.server import app, db
 from service.models import AddressSegment
 from service.models import Person
 
@@ -28,7 +29,18 @@ class AddressSchema(Schema):
 
     start_date = fields.Date(required=True)
     end_date = fields.Date(required=False)
+    # person_id = fields.Nested(PersonResultSchema(only=("id",)))
 
+    # @validates_schema()
+    # def validate_start_date(self, data, **kwargs):
+    #     if type(data) == list:
+    #         if data[0].get("person_id") is not None:
+    #             most_recent_start_date = data[0].get("person_id")
+    #             # query if works here
+    #             if data <= most_recent_start_date:
+    #                 raise ValidationError("Invalid start date")
+    #         else:
+    #             pass
 
 @app.route("/api/persons/<uuid:person_id>/address", methods=["GET"])
 @use_args(GetAddressQueryArgsSchema(), location="querystring")
@@ -46,6 +58,7 @@ def get_address(args, person_id):
 @app.route("/api/persons/<uuid:person_id>/address", methods=["PUT"])
 @use_args(AddressSchema())
 def create_address(payload, person_id):
+    
     person = Person.query.get(person_id)
     address_segment = AddressSegment(
         street_one=payload.get("street_one"),
@@ -70,10 +83,10 @@ def create_address(payload, person_id):
         # that begins on the start_date provided in the API request and continues
         # into the future. If the start_date provided is not greater than most recent
         # address segment start_date, raise an Exception.
-       
         most_recent_address = person.address_segments[-1]
         if address_segment.start_date <= most_recent_address.start_date:
-            raise ValueError("New start date must be after {}".format(most_recent_address.start_date))
+            raise ValueError("Start date must be after current start date")
+            # AddressSchema().load([address_segment, most_recent_address], many=True)   
         else:
             most_recent_address.end_date = address_segment.start_date
             db.session.add_all([most_recent_address, address_segment])
