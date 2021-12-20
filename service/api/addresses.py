@@ -89,7 +89,10 @@ def create_address(payload, person_id):
         if address_segment.start_date <= most_recent_address.start_date:
             raise ValueError("Start date must be after current start date")
             # use below with try/except?
-            # AddressSchema().load([address_segment, most_recent_address], many=True)
+            #try:
+               # AddressSchema().load([address_segment, most_recent_address], many=True)
+            #except ValidationError as err:
+                #err.message = "Start date must be after current start date"
         else:
             most_recent_address.end_date = address_segment.start_date
             db.session.add_all([most_recent_address, address_segment])
