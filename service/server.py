@@ -15,6 +15,7 @@ def initialize_routes(app: Flask) -> None:
     import service.api.persons  # noqa 401
     import service.api.addresses  # noqa 401
 
+
 class InvalidStartDate(ValueError):
     def __init__(self, *args):
         code = 422
